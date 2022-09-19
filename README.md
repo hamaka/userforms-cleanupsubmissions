@@ -4,8 +4,8 @@ Simple task to automatically cleanup userdata
 
 ## Requirements
 
-* Silverstripe ^4.0
-* UserForms ^5
+* Silverstripe ^3.0
+* UserForms ^4
 
 ## Installation
 ```

@@ -19,9 +19,9 @@
     ],
     "require": {
         "php": ">=7.1",
-        "silverstripe/framework": "^4.0",
-        "silverstripe/admin": "^1.0",
-        "silverstripe/userforms": "^5.0"
+		"silverstripe/cms": "^3.7",
+		"silverstripe/framework": "^3.7",
+        "silverstripe/userforms": "^4.0"
     },
     "autoload": {
         "psr-4": {

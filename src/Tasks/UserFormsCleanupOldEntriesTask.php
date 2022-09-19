@@ -21,14 +21,14 @@
         {
             $iThresholdDate = strtotime('-' . $this->config()->get('days_retention') . ' days');
             $sThresholdDate = date('Y-m-d 00:00:00', $iThresholdDate);
-            DB::alteration_message('Removing all entries before ' . $sThresholdDate);
+            echo ('Removing all entries before ' . $sThresholdDate);
 
-            DB::alteration_message('Total entries in database (before cleanup): ' . SubmittedForm::get()->count());
+            echo ('<br>Total entries in database (before cleanup): ' . SubmittedForm::get()->count());
 
             $iClearedEntries = $this->cleanUpUserForms($sThresholdDate);
-            DB::alteration_message('Total entries to be deleted: ' . $iClearedEntries);
+            echo ('<br>Total entries to be deleted: ' . $iClearedEntries);
 
-            DB::alteration_message("Done, total entries after cleanup: " . SubmittedForm::get()->count());
+            echo ("<br>Done, total entries after cleanup: " . SubmittedForm::get()->count());
         }
 
         /**
