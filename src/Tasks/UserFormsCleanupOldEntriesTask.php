@@ -2,9 +2,9 @@
 
     namespace Hamaka;
 
-    use SilverStripe\Dev\BuildTask;
-    use SilverStripe\ORM\DB;
-    use SilverStripe\UserForms\Model\Submission\SubmittedForm;
+    use BuildTask;
+    use Director;
+    use SubmittedForm;
 
     class UserFormsCleanupOldEntriesTask extends BuildTask
     {
@@ -19,16 +19,27 @@
 
         public function run($request)
         {
+            $aFeedback      = array();
             $iThresholdDate = strtotime('-' . $this->config()->get('days_retention') . ' days');
             $sThresholdDate = date('Y-m-d 00:00:00', $iThresholdDate);
-            echo ('Removing all entries before ' . $sThresholdDate);
+            $aFeedback []   = 'Removing all entries before ' . $sThresholdDate;
 
-            echo ('<br>Total entries in database (before cleanup): ' . SubmittedForm::get()->count());
+            $aFeedback [] = 'Total entries in database (before cleanup): ' . SubmittedForm::get()->count();
 
             $iClearedEntries = $this->cleanUpUserForms($sThresholdDate);
-            echo ('<br>Total entries to be deleted: ' . $iClearedEntries);
+            $aFeedback []    = 'Total entries to be deleted: ' . $iClearedEntries;
 
-            echo ("<br>Done, total entries after cleanup: " . SubmittedForm::get()->count());
+            $aFeedback [] = "Done, total entries after cleanup: " . SubmittedForm::get()->count();
+
+            if (Director::is_cli()) {
+                $sFeedback = implode(PHP_EOL, $aFeedback);
+            }
+            else {
+                $sSep      = PHP_EOL . '<br>&bull; ';
+                $sFeedback = $sSep . implode($sSep, $aFeedback);
+            }
+
+            echo $sFeedback;
         }
 
         /**
