@@ -1,6 +1,6 @@
 {
     "name": "hamaka/userforms-cleanupsubmissions",
-    "description": "Cleanup user submitted data",
+    "description": "Cleanup user submitted data in Silverstripe Userforms",
     "type": "silverstripe-vendormodule",
     "homepage": "https://github.com/hamaka/userforms-cleanupsubmissions",
     "keywords": [
@@ -25,7 +25,7 @@
     },
     "autoload": {
         "psr-4": {
-            "hamaka\\userforms-cleanupsubmissions": "src/"
+            "hamaka\\userforms-cleanupsubmissions\\": "src/"
         }
     },
     "extra": {
