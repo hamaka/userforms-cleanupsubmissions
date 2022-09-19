@@ -1,6 +1,6 @@
-# Silversripe Userforms: clean up form submissions
+# Silverstripe UserForms: clean up form submissions
 
-Simple module to automatically cleanup userdata
+Simple task to automatically cleanup userdata
 
 ## Requirements
 
@@ -13,12 +13,12 @@ composer require hamaka/userforms-cleanupsubmissions
 ```
 
 ## Retention period
-By default, the module will clean up entries older then 30 days.
+By default, the module will clean up entries older then 31 days.
 You can change the number of days you want to keep data stored via yml:
 
 ```yaml
 
 Hamaka\Tasks\UserFormsCleanupOldEntriesTask:
-  days_retention: 30
+  days_retention: 90
 
 ```

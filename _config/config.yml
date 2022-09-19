@@ -1,5 +1,0 @@
----
-Name: userformscleanup
----
-Hamaka\Tasks\UserFormsCleanupOldEntriesTask:
-  days_retention: 30

@@ -2,6 +2,7 @@
     "name": "hamaka/userforms-cleanupsubmissions",
     "description": "Cleanup user submitted data",
     "type": "silverstripe-vendormodule",
+    "homepage": "https://github.com/hamaka/userforms-cleanupsubmissions",
     "keywords": [
         "silverstripe",
         "userformd",
@@ -9,23 +10,28 @@
         "privacy"
     ],
     "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Bauke Zwaan",
+            "email": "bauke@hamaka.nl",
+            "role": "Developer"
+        }
+    ],
     "require": {
+        "php": ">=7.1",
         "silverstripe/framework": "^4.0",
         "silverstripe/admin": "^1.0",
         "silverstripe/userforms": "^5.0"
     },
     "autoload": {
         "psr-4": {
-            "SilverStripeModule\\Skeleton\\": "src/"
+            "hamaka\\userforms-cleanupsubmissions": "src/"
         }
     },
     "extra": {
         "branch-alias": {
             "dev-master": "2.x-dev"
-        },
-        "expose": [
-            "client/dist"
-        ]
+        }
     },
     "minimum-stability": "dev",
     "prefer-stable": true

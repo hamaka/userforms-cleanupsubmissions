@@ -1,21 +1,26 @@
 <?php
-    namespace Hamaka\Tasks;
-    use SilverStripe\Core\Config\Configurable;
+
+    namespace Hamaka;
+
+    use SilverStripe\Control\Director;
+    use SilverStripe\Dev\BuildTask;
+    use SilverStripe\UserForms\Model\Submission\SubmittedForm;
 
     class UserFormsCleanupOldEntriesTask extends BuildTask
     {
-        use Configurable;
 
-        protected $title = "UserForms Clean-up old SubmittedForms task";
+        protected $title = "UserForms Clean-up SubmittedForm task";
 
         protected $description = "Removes old user data for privacy reasons";
 
-        private static $days_retention = 30;
+        private static $segment = 'userforms-cleanup';
+
+        private static $days_retention = 31;
 
         public function run($request)
         {
 
-            $aFeedback   = [];
+            $aFeedback      = [];
             $iThresholdDate = strtotime('-' . $this->config()->get('days_retention') . ' days');
             $sThresholdDate = date('Y-m-d 00:00:00', $iThresholdDate);
             $aFeedback[]    = 'Removing all entries before ' . $sThresholdDate;
@@ -31,14 +36,19 @@
                 $sFeedback = implode(PHP_EOL, $aFeedback);
             }
             else {
-                $sSep = PHP_EOL . '<br>&bull; ';
+                $sSep      = PHP_EOL . '<br>&bull; ';
                 $sFeedback = $sSep . implode($sSep, $aFeedback);
             }
 
             echo $sFeedback;
         }
 
-        private static function cleanUpUserForms($sBeforeDate)
+        /**
+         * @param $sBeforeDate String Date written as Y-m-d h:m:s
+         *
+         * @return int
+         */
+        public static function cleanUpUserForms(string $sBeforeDate): int
         {
             $dlSubmissions     = SubmittedForm::get()->filter('Created:LessThanOrEqual', $sBeforeDate);
             $iTotalToBeCleared = $dlSubmissions->count();
