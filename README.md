@@ -7,10 +7,11 @@ To install run `composer require hamaka/userforms-cleanupsubmissions`.
 
 ## Requirements
 
-* Silverstripe ^4.0
-* UserForms ^5
+* Silverstripe ^5.0
+* UserForms ^6
 
 **Note:** For Silverstripe 3.x, please use the [2.x release line](https://github.com/hamaka/userforms-cleanupsubmissions/tree/3).
+**Note:** For Silverstripe 4.x, please use the [3.x release line](https://github.com/hamaka/userforms-cleanupsubmissions/tree/4).
 
 ## Retention period
 By default, the module will clean up entries older then 31 days.
