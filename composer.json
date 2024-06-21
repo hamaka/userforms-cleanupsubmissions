@@ -1,7 +1,7 @@
 {
     "name": "hamaka/userforms-cleanupsubmissions",
     "description": "Cleanup user submitted data in Silverstripe Userforms",
-    "type": "silverstripe-module",
+    "type": "silverstripe-vendormodule",
     "homepage": "https://github.com/hamaka/userforms-cleanupsubmissions",
     "keywords": [
         "silverstripe",
@@ -19,7 +19,7 @@
     ],
     "require": {
         "php": "^8.1",
-        "silverstripe/userforms": "^6.0"
+        "silverstripe/userforms": "^6 || ^"
     },
     "autoload": {
         "psr-4": {
