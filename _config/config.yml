@@ -2,9 +2,14 @@
 Name: hamaka-userforms-retention
 ---
 
+
 SilverStripe\UserForms\Model\UserDefinedForm:
   extensions:
     - Hamaka\UserForms\Model\UserFormRetentionExtension
+
+DNADesign\Elemental\Models\BaseElement:
+  extensions:
+    - Hamaka\UserForms\Model\ElementalUserFormRetentionExtension
 
 Hamaka\UserForms\Model\UserFormRetentionExtension:
   # Default retention policy options (in days)
