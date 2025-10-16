@@ -1,0 +1,14 @@
+en:
+  Hamaka\UserForms\Model:
+    RETENTION_1_DAY: '1 day'
+    RETENTION_2_DAYS: '2 days'
+    RETENTION_1_WEEK: '1 week'
+    RETENTION_2_WEEKS: '2 weeks'
+    RETENTION_1_MONTH: '1 month'
+    RETENTION_2_MONTHS: '2 months'
+    RETENTION_6_MONTHS: '6 months'
+    RETENTION_NEVER: 'Never delete'
+    SELECT_RETENTION_POLICY: '-- Select a retention policy --'
+    SUBMISSION_RETENTION_POLICY: 'Submission Retention Policy'
+  Hamaka\UserForms\Model\UserFormRetentionExtension:
+    db_SubmissionRetentionDays: 'Submission retention days'
