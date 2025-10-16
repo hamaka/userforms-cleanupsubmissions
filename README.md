@@ -60,16 +60,17 @@ You can customize the available retention options in your project's `_config.yml
 
 ```yaml
 Hamaka\UserForms\Model\UserFormRetentionExtension:
+  # Override this in your project's _config.yml to customize
   retention_options:
-    1:
-      label: 'Hamaka\UserForms\Model.RETENTION_1_DAY'
-      default: '1 day'
-    7:
-      label: 'Hamaka\UserForms\Model.RETENTION_1_WEEK'
-      default: '1 week'
-    0:
-      label: 'Hamaka\UserForms\Model.RETENTION_NEVER'
-      default: 'Never delete'
+    1: '1 day'
+    2: '2 days'
+    7: '1 week'
+    14: '2 weeks'
+    31: '1 month'
+    62: '2 months'
+    182: '6 months'
+    0: 'Never delete'
+
 ```
 
 ## Running the cleanup task
