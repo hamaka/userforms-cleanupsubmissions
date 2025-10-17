@@ -7,7 +7,7 @@ SilverStripe\UserForms\Model\UserDefinedForm:
   extensions:
     - Hamaka\UserForms\Model\UserFormRetentionExtension
 
-DNADesign\Elemental\Models\BaseElement:
+DNADesign\ElementalUserForms\Model\ElementForm:
   extensions:
     - Hamaka\UserForms\Model\ElementalUserFormRetentionExtension
 
@@ -31,4 +31,4 @@ Hamaka\UserForms\Model\UserFormRetentionExtension:
 Hamaka\Tasks\UserFormsCleanupOldEntriesTask:
   # Fallback retention period (in days) for legacy support
   # This is only used if a submission has no associated form retention policy
-  days_retention: 31
+  days_retention: 30

@@ -72,7 +72,7 @@ class ElementalUserFormRetentionExtension extends DataExtension
                 $translatedOptions,
                 $this->owner->SubmissionRetentionDays
             )->setEmptyString(_t('Hamaka\\UserForms\\Model.SELECT_RETENTION_POLICY', '-- Select a retention policy --')),
-            'SubmitButtonText'
+            'DisableSaveSubmissions'
         );
     }
 

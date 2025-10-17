@@ -1,14 +1,16 @@
 nl:
   Hamaka\UserForms\Model:
     RETENTION_1_DAY: '1 dag'
-    RETENTION_2_DAYS: '2 dagen'
-    RETENTION_1_WEEK: '1 week'
-    RETENTION_2_WEEKS: '2 weken'
     RETENTION_1_MONTH: '1 maand'
+    RETENTION_1_WEEK: '1 week'
+    RETENTION_2_DAYS: '2 dagen'
     RETENTION_2_MONTHS: '2 maanden'
+    RETENTION_2_WEEKS: '2 weken'
     RETENTION_6_MONTHS: '6 maanden'
     RETENTION_NEVER: 'Nooit verwijderen'
     SELECT_RETENTION_POLICY: '-- Selecteer een bewaarbeleid --'
     SUBMISSION_RETENTION_POLICY: 'Bewaarbeleid Inzendingen'
+  Hamaka\UserForms\Model\ElementalUserFormRetentionExtension:
+    db_SubmissionRetentionDays: 'Submission retention days'
   Hamaka\UserForms\Model\UserFormRetentionExtension:
     db_SubmissionRetentionDays: 'Submission retention days'
