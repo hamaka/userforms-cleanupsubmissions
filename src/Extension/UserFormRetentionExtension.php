@@ -2,8 +2,9 @@
 
 namespace Hamaka\UserForms\Model;
 
+use SilverStripe\Core\Config\Config;
 use SilverStripe\Forms\DropdownField;
-use SilverStripe\UserForms\Model\UserDefinedForm;
+use SilverStripe\Forms\FieldList;
 use SilverStripe\ORM\DataExtension;
 
 class UserFormRetentionExtension extends DataExtension
@@ -12,57 +13,16 @@ class UserFormRetentionExtension extends DataExtension
         'SubmissionRetentionDays' => 'Int',
     ];
 
-    /**
-     * Retention policy options (days)
-     * Override in your _config.yml to customize
-     */
-    private static $retention_options = [
-        1 => 'Hamaka\\UserForms\\Model.RETENTION_1_DAY',
-        2 => 'Hamaka\\UserForms\\Model.RETENTION_2_DAYS',
-        7 => 'Hamaka\\UserForms\\Model.RETENTION_1_WEEK',
-        14 => 'Hamaka\\UserForms\\Model.RETENTION_2_WEEKS',
-        31 => 'Hamaka\\UserForms\\Model.RETENTION_1_MONTH',
-        62 => 'Hamaka\\UserForms\\Model.RETENTION_2_MONTHS',
-        182 => 'Hamaka\\UserForms\\Model.RETENTION_6_MONTHS',
-        0 => 'Hamaka\\UserForms\\Model.RETENTION_NEVER',
-    ];
 
-    public function updateCMSFields(\SilverStripe\Forms\FieldList $fields)
+
+    public function updateCMSFields(FieldList $fields)
     {
         $retentionOptions = $this->owner->config()->get('retention_options');
 
         // Translate the options
         $translatedOptions = [];
-
         foreach ($retentionOptions as $days => $translationKey) {
-            switch ($days) {
-                case 1:
-                    $translatedOptions[$days] = _t($translationKey, '1 day');
-                    break;
-                case 2:
-                    $translatedOptions[$days] = _t($translationKey, '2 days');
-                    break;
-                case 7:
-                    $translatedOptions[$days] = _t($translationKey, '1 week');
-                    break;
-                case 14:
-                    $translatedOptions[$days] = _t($translationKey, '2 weeks');
-                    break;
-                case 31:
-                    $translatedOptions[$days] = _t($translationKey, '1 month');
-                    break;
-                case 62:
-                    $translatedOptions[$days] = _t($translationKey, '2 months');
-                    break;
-                case 182:
-                    $translatedOptions[$days] = _t($translationKey, '6 months');
-                    break;
-                case 0:
-                    $translatedOptions[$days] = _t($translationKey, 'Never delete');
-                    break;
-                default:
-                    $translatedOptions[$days] = $translationKey;
-            }
+            $translatedOptions[$days] = _t($translationKey, $translationKey);
         }
 
         $fields->addFieldToTab(
@@ -79,16 +39,46 @@ class UserFormRetentionExtension extends DataExtension
 
     /**
      * Get the threshold date for this form's submissions
+     * Returns null if retention is set to "never delete" (-1)
+     * Returns date string for all other cases
      */
     public function getSubmissionThresholdDate()
     {
         $retentionDays = $this->owner->SubmissionRetentionDays;
 
-        if (!$retentionDays || $retentionDays === 0) {
-            return null; // Never delete
+        // -1 means never delete
+        if ($retentionDays === -1 || $retentionDays === '-1') {
+            return null;
         }
+
+        // 0 or empty means use default from config
+        if ($retentionDays === 0 || $retentionDays === '0' || !$retentionDays) {
+            $retentionDays = (int) Config::inst()->get(\Hamaka\Tasks\UserFormsCleanupOldEntriesTask::class, 'days_retention');
+        }
+
 
         $iThresholdDate = strtotime('-' . $retentionDays . ' days');
         return date('Y-m-d 00:00:00', $iThresholdDate);
+    }
+
+    /**
+     * Get the effective retention days (resolves default)
+     * Useful for displaying in logs/UI
+     */
+    public function getEffectiveRetentionDays()
+    {
+        $retentionDays = $this->owner->SubmissionRetentionDays;
+
+        // -1 means never delete
+        if ($retentionDays === -1 || $retentionDays === '-1') {
+            return -1;
+        }
+
+        // 0 or empty means use default from config
+        if ($retentionDays === 0 || $retentionDays === '0' || !$retentionDays) {
+            return  (int) Config::inst()->get(\Hamaka\Tasks\UserFormsCleanupOldEntriesTask::class, 'days_retention');
+        }
+
+        return $retentionDays;
     }
 }

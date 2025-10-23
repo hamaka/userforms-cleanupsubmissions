@@ -7,6 +7,7 @@ en:
     RETENTION_1_MONTH: '1 month'
     RETENTION_2_MONTHS: '2 months'
     RETENTION_6_MONTHS: '6 months'
+    RETENTION_1_YEAR: '1 Year'
     RETENTION_NEVER: 'Never delete'
     SELECT_RETENTION_POLICY: '-- Select a retention policy --'
     SUBMISSION_RETENTION_POLICY: 'Submission Retention Policy'

@@ -2,33 +2,25 @@
 Name: hamaka-userforms-retention
 ---
 
-
 SilverStripe\UserForms\Model\UserDefinedForm:
   extensions:
     - Hamaka\UserForms\Model\UserFormRetentionExtension
 
 DNADesign\ElementalUserForms\Model\ElementForm:
   extensions:
-    - Hamaka\UserForms\Model\ElementalUserFormRetentionExtension
+    - Hamaka\UserForms\Model\UserFormRetentionExtension
 
 Hamaka\UserForms\Model\UserFormRetentionExtension:
-  # Default retention policy options (in days)
-  # Override this in your project's _config.yml to customize
   retention_options:
-    1: '1 day'
-    2: '2 days'
-    7: '1 week'
-    14: '2 weeks'
-    31: '1 month'
-    62: '2 months'
-    182: '6 months'
-    0: 'Never delete'
-
-  # Default fallback value for forms without a policy set (in days)
-  # 0 means never delete, negative values are not allowed
-  default_retention: 31
+    1: 'Hamaka\UserForms\Model.RETENTION_1_DAY'
+    2: 'Hamaka\UserForms\Model.RETENTION_2_DAYS'
+    7: 'Hamaka\UserForms\Model.RETENTION_1_WEEK'
+    14: 'Hamaka\UserForms\Model.RETENTION_2_WEEKS'
+    31: 'Hamaka\UserForms\Model.RETENTION_1_MONTH'
+    62: 'Hamaka\UserForms\Model.RETENTION_2_MONTHS'
+    182: 'Hamaka\UserForms\Model.RETENTION_6_MONTHS'
+    365: 'Hamaka\UserForms\Model.RETENTION_1_YEAR'
+    -1: 'Hamaka\UserForms\Model.RETENTION_NEVER'
 
 Hamaka\Tasks\UserFormsCleanupOldEntriesTask:
-  # Fallback retention period (in days) for legacy support
-  # This is only used if a submission has no associated form retention policy
-  days_retention: 30
+  days_retention: 31

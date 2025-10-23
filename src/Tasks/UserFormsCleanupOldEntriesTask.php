@@ -16,9 +16,6 @@
 
         private static $segment = 'userforms-cleanup';
 
-        // Fallback for forms without a retention policy set
-        private static $days_retention = 31;
-
         public function run($request)
         {
             DB::alteration_message('Starting UserForms cleanup task...');
@@ -26,22 +23,21 @@
 
             $totalCleared = 0;
 
-            // Handle normal UserDefinedForms with explicit retention
-            $forms = UserDefinedForm::get()
-                                    ->filter('SubmissionRetentionDays:GreaterThan', 0)
-                                    ->exclude('SubmissionRetentionDays', null);
+            // Handle normal UserDefinedForms
+            $forms = UserDefinedForm::get();
 
             if ($forms->count() === 0) {
-                DB::alteration_message('No regular forms with retention policies found.');
+                DB::alteration_message('No regular forms found.');
             }
             else {
-                DB::alteration_message('Found ' . $forms->count() . ' regular forms with retention policies');
+                DB::alteration_message('Found ' . $forms->count() . ' regular forms');
             }
 
             foreach ($forms as $form) {
                 $thresholdDate = $form->getSubmissionThresholdDate();
 
-                if ( ! $thresholdDate) {
+                // null means never delete (-1)
+                if ($thresholdDate === null) {
                     DB::alteration_message(sprintf(
                         'Form "%s" (ID: %d) has retention policy set to "Never delete" - skipping',
                         $form->Title,
@@ -50,11 +46,15 @@
                     continue;
                 }
 
+                $effectiveDays = $form->getEffectiveRetentionDays();
+
                 DB::alteration_message(sprintf(
-                    'Processing form "%s" (ID: %d) - removing entries before %s',
+                    'Processing form "%s" (ID: %d) - removing entries before %s (retention: %d days%s)',
                     $form->Title,
                     $form->ID,
-                    $thresholdDate
+                    $thresholdDate,
+                    $effectiveDays,
+                    ($form->SubmissionRetentionDays === 0 || ! $form->SubmissionRetentionDays) ? ' - default' : ''
                 ));
 
                 $cleared      = $this->cleanUpUserFormSubmissions($form->ID, $thresholdDate);
@@ -72,20 +72,40 @@
                 $totalCleared     += $elementalCleared;
             }
 
-            // LEGACY fallback cleanup for all old submissions without any retention policy
-            $legacyCleared = self::cleanUpUserForms();
-            if ($legacyCleared > 0) {
-                DB::alteration_message('');
-                DB::alteration_message(sprintf('Legacy cleanup removed %d old submissions (fallback policy)', $legacyCleared));
-            }
-
-            $totalCleared += $legacyCleared;
-
             DB::alteration_message('');
             DB::alteration_message('=======================================');
             DB::alteration_message('Total entries deleted: ' . $totalCleared);
             DB::alteration_message('Total entries remaining: ' . SubmittedForm::get()->count());
             DB::alteration_message('Done.');
+        }
+
+        /**
+         * Remove submissions for a specific form before a given date
+         */
+        private function cleanUpUserFormSubmissions(int $formID, string $beforeDate): int
+        {
+            // Get all submissions for this form
+            $allSubmissions = SubmittedForm::get()
+                                           ->filter([
+                                               'ParentID' => $formID,
+                                           ]);
+
+            if ($allSubmissions->count() === 0) {
+                return 0;
+            }
+
+            // Then filter those older than the threshold date
+            $submissions = $allSubmissions->filter([
+                'Created:LessThanOrEqual' => $beforeDate,
+            ]);
+
+            $count = $submissions->count();
+
+            if ($count > 0) {
+                $submissions->removeAll();
+            }
+
+            return $count;
         }
 
         /**
@@ -110,24 +130,45 @@
             }
 
             try {
-                $query = DB::query("
-                SELECT DISTINCT ef.ID, ef.SubmissionRetentionDays
-                FROM ElementForm ef
-                WHERE ef.SubmissionRetentionDays > 0
-                AND ef.SubmissionRetentionDays IS NOT NULL
-            ");
+                $defaultRetentionDays = (int)Config::inst()->get(self::class, 'days_retention') ?: 31;
 
-                if ( ! $query->numRecords()) {
-                    DB::alteration_message('No elemental forms with retention policies found.');
+                // Get ALL elemental forms
+                $allForms = DB::query("
+            SELECT DISTINCT ef.ID, ef.SubmissionRetentionDays
+            FROM ElementForm ef
+        ");
+
+                if ( ! $allForms->numRecords()) {
+                    DB::alteration_message('No elemental forms found.');
 
                     return 0;
                 }
 
-                DB::alteration_message('Found ' . $query->numRecords() . ' elemental forms with retention policies');
+                DB::alteration_message('Found ' . $allForms->numRecords() . ' elemental forms');
 
-                foreach ($query as $record) {
+                foreach ($allForms as $record) {
                     $elementID     = $record['ID'];
                     $retentionDays = $record['SubmissionRetentionDays'];
+
+                    // Use default if not set or invalid (legacy support)
+                    if ($retentionDays <= 0 || is_null($retentionDays)) {
+                        $retentionDays = $defaultRetentionDays;
+                        DB::alteration_message(sprintf(
+                            'Elemental form (ID: %d) - using default retention of %d days',
+                            $elementID,
+                            $retentionDays
+                        ));
+                    }
+
+                    // Skip if retention is -1 (never)
+                    if ($retentionDays === -1) {
+                        DB::alteration_message(sprintf(
+                            'Skipping elemental form (ID: %d) - retention set to never',
+                            $elementID
+                        ));
+                        continue;
+                    }
+
                     $thresholdDate = date('Y-m-d H:i:s', strtotime("-{$retentionDays} days"));
 
                     DB::alteration_message(sprintf(
@@ -159,53 +200,5 @@
             }
 
             return $totalCleared;
-        }
-
-        /**
-         * Remove submissions for a specific form before a given date
-         */
-        private function cleanUpUserFormSubmissions(int $formID, string $beforeDate): int
-        {
-            $submissions = SubmittedForm::get()
-                                        ->filter([
-                                            'ParentID'                => $formID,
-                                            'Created:LessThanOrEqual' => $beforeDate,
-                                        ]);
-
-            $count = $submissions->count();
-
-            if ($count > 0) {
-                $submissions->removeAll();
-            }
-
-            return $count;
-        }
-
-        /**
-         * Legacy fallback cleanup for *all* submissions older than the global retention period
-         */
-        public static function cleanUpUserForms(?string $beforeDate = null): int
-        {
-            // ✅ Gebruik Config om de YAML-waarde op te halen
-            $days = (int)Config::inst()->get(__CLASS__, 'days_retention') ?: static::$days_retention;
-
-            $thresholdDate = $beforeDate ?: date('Y-m-d H:i:s', strtotime("-{$days} days"));
-
-            DB::alteration_message(sprintf(
-                'Running legacy cleanup for all submissions older than %d days (%s)',
-                $days,
-                $thresholdDate
-            ));
-
-            $submissions = SubmittedForm::get()
-                                        ->filter('Created:LessThanOrEqual', $thresholdDate);
-
-            $count = $submissions->count();
-
-            if ($count > 0) {
-                $submissions->removeAll();
-            }
-
-            return $count;
         }
     }
