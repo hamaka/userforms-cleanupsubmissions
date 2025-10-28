@@ -14,6 +14,10 @@
 
         protected $description = "Removes old userdata for privacy reasons based on per-form retention policies";
 
+        private static $days_retention = 31;
+
+
+
         private static $segment = 'userforms-cleanup';
 
         public function run($request)
