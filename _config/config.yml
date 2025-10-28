@@ -10,17 +10,6 @@ DNADesign\ElementalUserForms\Model\ElementForm:
   extensions:
     - Hamaka\UserForms\Model\UserFormRetentionExtension
 
-Hamaka\UserForms\Model\UserFormRetentionExtension:
-  retention_options:
-    1: 'Hamaka\UserForms\Model.RETENTION_1_DAY'
-    2: 'Hamaka\UserForms\Model.RETENTION_2_DAYS'
-    7: 'Hamaka\UserForms\Model.RETENTION_1_WEEK'
-    14: 'Hamaka\UserForms\Model.RETENTION_2_WEEKS'
-    31: 'Hamaka\UserForms\Model.RETENTION_1_MONTH'
-    62: 'Hamaka\UserForms\Model.RETENTION_2_MONTHS'
-    182: 'Hamaka\UserForms\Model.RETENTION_6_MONTHS'
-    365: 'Hamaka\UserForms\Model.RETENTION_1_YEAR'
-    -1: 'Hamaka\UserForms\Model.RETENTION_NEVER'
 
-Hamaka\Tasks\UserFormsCleanupOldEntriesTask:
-  days_retention: 31
+
+
