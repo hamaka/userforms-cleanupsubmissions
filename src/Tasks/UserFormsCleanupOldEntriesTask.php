@@ -150,6 +150,15 @@
                     $elementID     = $record['ID'];
                     $retentionDays = $record['SubmissionRetentionDays'];
 
+                    // Skip if retention is -1 (never)
+                    if ($retentionDays === -1) {
+                        DB::alteration_message(sprintf(
+                            'Skipping elemental form (ID: %d) - retention set to never',
+                            $elementID
+                        ));
+                        continue;
+                    }
+
                     // Use default if not set or invalid (legacy support)
                     if ($retentionDays <= 0 || is_null($retentionDays)) {
                         $retentionDays = $defaultRetentionDays;
@@ -158,15 +167,6 @@
                             $elementID,
                             $retentionDays
                         ));
-                    }
-
-                    // Skip if retention is -1 (never)
-                    if ($retentionDays === -1) {
-                        DB::alteration_message(sprintf(
-                            'Skipping elemental form (ID: %d) - retention set to never',
-                            $elementID
-                        ));
-                        continue;
                     }
 
                     $thresholdDate = date('Y-m-d H:i:s', strtotime("-{$retentionDays} days"));
