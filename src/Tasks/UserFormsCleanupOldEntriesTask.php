@@ -122,7 +122,7 @@
                 return 0;
             }
 
-            $columns = DB::field_list('elementform');
+            $columns = DB::field_list('ElementForm');
             if ( ! isset($columns['SubmissionRetentionDays'])) {
                 DB::alteration_message('SubmissionRetentionDays column not found on ElementForm.');
 
