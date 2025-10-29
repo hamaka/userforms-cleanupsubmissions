@@ -25,7 +25,7 @@
             31  => 'Hamaka\\UserForms\\Model.RETENTION_1_MONTH',
             62  => 'Hamaka\\UserForms\\Model.RETENTION_2_MONTHS',
             182 => 'Hamaka\\UserForms\\Model.RETENTION_6_MONTHS',
-            0   => 'Hamaka\\UserForms\\Model.RETENTION_NEVER',
+            -1   => 'Hamaka\\UserForms\\Model.RETENTION_NEVER',
         ];
 
         public function updateCMSFields(FieldList $fields)

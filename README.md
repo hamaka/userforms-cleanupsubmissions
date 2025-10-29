@@ -69,7 +69,7 @@ Hamaka\UserForms\Model\UserFormRetentionExtension:
     31: '1 month'
     62: '2 months'
     182: '6 months'
-    0: 'Never delete'
+    -1: 'Never delete'
 
 ```
 
