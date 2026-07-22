@@ -5,25 +5,28 @@
     use SilverStripe\Core\Config\Config;
     use SilverStripe\Dev\BuildTask;
     use SilverStripe\ORM\DB;
+    use SilverStripe\PolyExecution\PolyOutput;
     use SilverStripe\UserForms\Model\Submission\SubmittedForm;
     use SilverStripe\UserForms\Model\UserDefinedForm;
+    use Symfony\Component\Console\Command\Command;
+    use Symfony\Component\Console\Input\InputInterface;
 
     class UserFormsCleanupOldEntriesTask extends BuildTask
     {
-        protected $title = "UserForms Clean-up SubmittedForm task";
+        protected static string $commandName = 'userforms-cleanup';
 
-        protected $description = "Removes old userdata for privacy reasons based on per-form retention policies";
+        protected string $title = 'UserForms Clean-up SubmittedForm task';
+
+        protected static string $description = "Removes old userdata for privacy reasons based on per-form retention policies";
 
         private static $days_retention = 31;
 
+        private bool $hadErrors = false;
 
-
-        private static $segment = 'userforms-cleanup';
-
-        public function run($request)
+        protected function execute(InputInterface $input, PolyOutput $output): int
         {
-            DB::alteration_message('Starting UserForms cleanup task...');
-            DB::alteration_message('Total entries in database (before cleanup): ' . SubmittedForm::get()->count());
+            $output->writeln('Starting UserForms cleanup task...');
+            $output->writeln('Total entries in database (before cleanup): ' . SubmittedForm::get()->count());
 
             $totalCleared = 0;
 
@@ -31,10 +34,10 @@
             $forms = UserDefinedForm::get();
 
             if ($forms->count() === 0) {
-                DB::alteration_message('No regular forms found.');
+                $output->writeln('No regular forms found.');
             }
             else {
-                DB::alteration_message('Found ' . $forms->count() . ' regular forms');
+                $output->writeln('Found ' . $forms->count() . ' regular forms');
             }
 
             foreach ($forms as $form) {
@@ -42,7 +45,7 @@
 
                 // null means never delete (-1)
                 if ($thresholdDate === null) {
-                    DB::alteration_message(sprintf(
+                    $output->writeln(sprintf(
                         'Form "%s" (ID: %d) has retention policy set to "Never delete" - skipping',
                         $form->Title,
                         $form->ID
@@ -52,7 +55,7 @@
 
                 $effectiveDays = $form->getEffectiveRetentionDays();
 
-                DB::alteration_message(sprintf(
+                $output->writeln(sprintf(
                     'Processing form "%s" (ID: %d) - removing entries before %s (retention: %d days%s)',
                     $form->Title,
                     $form->ID,
@@ -64,7 +67,7 @@
                 $cleared      = $this->cleanUpUserFormSubmissions($form->ID, $thresholdDate);
                 $totalCleared += $cleared;
 
-                DB::alteration_message($cleared > 0
+                $output->writeln($cleared > 0
                     ? sprintf('  → Deleted %d entries', $cleared)
                     : '  → No entries to delete'
                 );
@@ -72,15 +75,17 @@
 
             // Handle Elemental Forms
             if (class_exists('DNADesign\Elemental\Models\BaseElement')) {
-                $elementalCleared = $this->cleanUpElementalForms();
+                $elementalCleared = $this->cleanUpElementalForms($output);
                 $totalCleared     += $elementalCleared;
             }
 
-            DB::alteration_message('');
-            DB::alteration_message('=======================================');
-            DB::alteration_message('Total entries deleted: ' . $totalCleared);
-            DB::alteration_message('Total entries remaining: ' . SubmittedForm::get()->count());
-            DB::alteration_message('Done.');
+            $output->writeln('');
+            $output->writeln('=======================================');
+            $output->writeln('Total entries deleted: ' . $totalCleared);
+            $output->writeln('Total entries remaining: ' . SubmittedForm::get()->count());
+            $output->writeln('Done.');
+
+            return $this->hadErrors ? Command::FAILURE : Command::SUCCESS;
         }
 
         /**
@@ -115,20 +120,20 @@
         /**
          * Clean up submissions for Elemental UserForm blocks
          */
-        private function cleanUpElementalForms(): int
+        private function cleanUpElementalForms(PolyOutput $output): int
         {
             $totalCleared = 0;
             $tables       = DB::table_list();
 
             if ( ! isset($tables['elementform'])) {
-                DB::alteration_message('ElementForm table not found.');
+                $output->writeln('ElementForm table not found.');
 
                 return 0;
             }
 
             $columns = DB::field_list('ElementForm');
             if ( ! isset($columns['SubmissionRetentionDays'])) {
-                DB::alteration_message('SubmissionRetentionDays column not found on ElementForm.');
+                $output->writeln('SubmissionRetentionDays column not found on ElementForm.');
 
                 return 0;
             }
@@ -143,12 +148,12 @@
         ");
 
                 if ( ! $allForms->numRecords()) {
-                    DB::alteration_message('No elemental forms found.');
+                    $output->writeln('No elemental forms found.');
 
                     return 0;
                 }
 
-                DB::alteration_message('Found ' . $allForms->numRecords() . ' elemental forms');
+                $output->writeln('Found ' . $allForms->numRecords() . ' elemental forms');
 
                 foreach ($allForms as $record) {
                     $elementID     = $record['ID'];
@@ -156,7 +161,7 @@
 
                     // Skip if retention is -1 (never)
                     if ($retentionDays === -1) {
-                        DB::alteration_message(sprintf(
+                        $output->writeln(sprintf(
                             'Skipping elemental form (ID: %d) - retention set to never',
                             $elementID
                         ));
@@ -166,7 +171,7 @@
                     // Use default if not set or invalid (legacy support)
                     if ($retentionDays <= 0 || is_null($retentionDays)) {
                         $retentionDays = $defaultRetentionDays;
-                        DB::alteration_message(sprintf(
+                        $output->writeln(sprintf(
                             'Elemental form (ID: %d) - using default retention of %d days',
                             $elementID,
                             $retentionDays
@@ -175,7 +180,7 @@
 
                     $thresholdDate = date('Y-m-d H:i:s', strtotime("-{$retentionDays} days"));
 
-                    DB::alteration_message(sprintf(
+                    $output->writeln(sprintf(
                         'Processing elemental form (ID: %d) - removing entries before %s',
                         $elementID,
                         $thresholdDate
@@ -192,15 +197,16 @@
                     if ($cleared > 0) {
                         $submissions->removeAll();
                         $totalCleared += $cleared;
-                        DB::alteration_message(sprintf('  → Deleted %d entries', $cleared));
+                        $output->writeln(sprintf('  → Deleted %d entries', $cleared));
                     }
                     else {
-                        DB::alteration_message('  → No entries to delete');
+                        $output->writeln('  → No entries to delete');
                     }
                 }
             }
             catch (\Exception $e) {
-                DB::alteration_message('Error processing elemental forms: ' . $e->getMessage());
+                $output->writeln('Error processing elemental forms: ' . $e->getMessage());
+                $this->hadErrors = true;
             }
 
             return $totalCleared;

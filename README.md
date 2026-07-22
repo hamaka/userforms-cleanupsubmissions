@@ -7,10 +7,10 @@ To install run `composer require hamaka/userforms-cleanupsubmissions`.
 
 ## Requirements
 
-* Silverstripe ^5.0
-* UserForms ^6
+* Silverstripe ^6.0
+* UserForms ^7
 
-**Note:** For Silverstripe 3, please use the [3.x release line](https://github.com/hamaka/userforms-cleanupsubmissions/tree/3), for Silverstripe 4, please use the [4.x release line](https://github.com/hamaka/userforms-cleanupsubmissions/tree/4).
+**Note:** This is the SilverStripe 6 release line (branch `6`). For Silverstripe 3, please use the [3.x release line](https://github.com/hamaka/userforms-cleanupsubmissions/tree/3), for Silverstripe 4, please use the [4.x release line](https://github.com/hamaka/userforms-cleanupsubmissions/tree/4), for Silverstripe 5, please use the [5.x release line](https://github.com/hamaka/userforms-cleanupsubmissions/tree/5).
 
 ## Features
 
@@ -78,13 +78,13 @@ Hamaka\UserForms\Model\UserFormRetentionExtension:
 The cleanup task can be run manually via the command line:
 
 ```
-sake dev/tasks/userforms-cleanup
+sake tasks:userforms-cleanup
 ```
 
 Or you can set it up to run automatically via a cron job:
 
 ```bash
-*/1 * * * * cd /path/to/project && sake dev/tasks/userforms-cleanup
+*/1 * * * * cd /path/to/project && sake tasks:userforms-cleanup
 ```
 
 ## Translations

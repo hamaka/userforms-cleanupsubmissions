@@ -3,11 +3,11 @@
     namespace Hamaka\UserForms\Model;
 
     use SilverStripe\Core\Config\Config;
+    use SilverStripe\Core\Extension;
     use SilverStripe\Forms\DropdownField;
     use SilverStripe\Forms\FieldList;
-    use SilverStripe\ORM\DataExtension;
 
-    class UserFormRetentionExtension extends DataExtension
+    class UserFormRetentionExtension extends Extension
     {
         private static $db = [
             'SubmissionRetentionDays' => 'Int',
